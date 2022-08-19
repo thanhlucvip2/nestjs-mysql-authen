@@ -1,3 +1,4 @@
+import { HttpErrorFilter } from './shared/http-error.filter';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -11,6 +12,8 @@ import {
   DB_NAME,
 } from './@config/constants';
 import { ProductModule } from './product/product.module';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './shared/logging.interceptor';
 
 @Module({
   imports: [
@@ -28,6 +31,7 @@ import { ProductModule } from './product/product.module';
         password: configService.get(DB_PASSWORD),
         database: configService.get(DB_NAME),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        logging: true, // logging câu truy vấn trong database
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -35,6 +39,16 @@ import { ProductModule } from './product/product.module';
     ProductModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpErrorFilter, // import httpError vào module
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor, // import interceptor vào module
+    },
+  ],
 })
 export class AppModule {}
