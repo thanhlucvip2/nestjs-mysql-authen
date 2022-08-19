@@ -25,9 +25,7 @@ export class ProductController {
   }
 
   @Post()
-  async createData(
-    @Body() bodyDto: ProductDto,
-  ): Promise<ProductEntity | { success: boolean; message: string }> {
+  async createData(@Body() bodyDto: ProductDto): Promise<ProductEntity> {
     return await this.productService.create(bodyDto);
   }
 

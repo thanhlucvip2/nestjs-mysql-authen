@@ -1,6 +1,11 @@
 import { ProductDto } from './dto/product.dto';
 import { ProductEntity } from './product.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductRepository } from './product.repository';
 
@@ -28,39 +33,50 @@ export class ProductService {
     **/
 
     if (!product) {
-      throw new NotFoundException({ message: 'khong co data' });
+      throw new HttpException('không tìm thấy Id', HttpStatus.NOT_FOUND); // sử dụng httpError , HttpStatus.NOT_FOUND : là status trả về ( 404 )
     }
     return product;
   }
 
-  async create(
-    dto: ProductDto,
-  ): Promise<ProductEntity | { success: boolean; message: string }> {
+  async create(dto: ProductDto): Promise<ProductEntity> {
     try {
       const product = await this.productRepository.create(dto);
       return await this.productRepository.save(product);
     } catch (error) {
-      return { success: false, message: error.sqlMessage };
+      throw new HttpException(
+        error.sqlMessage,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async deleteData(id: string): Promise<{ delete: boolean }> {
-    console.log(id);
-
-    try {
-      await this.productRepository.delete({ id });
-      return {
-        delete: true,
-      };
-    } catch (error) {
-      return {
-        delete: false,
-      };
+    const product = await this.productRepository.findOneBy({ id });
+    // kiểm tra xem id có tồn tại không
+    if (!product) {
+      throw new HttpException('không tìm thấy Id', HttpStatus.NOT_FOUND); // sử dụng httpError , HttpStatus.NOT_FOUND : là status trả về ( 404 )
     }
+    // tiến hành delete
+    await this.productRepository.delete({ id });
+    return {
+      delete: true,
+    };
   }
 
   async updateData(id: string, newData: ProductDto): Promise<ProductEntity> {
-    await this.productRepository.update({ id }, newData);
-    return await this.productRepository.findOne({ where: { id } });
+    try {
+      const product = await this.productRepository.findOneBy({ id });
+      // kiểm tra xem id có tồn tại không
+      if (!product) {
+        throw new HttpException('không tìm thấy Id', HttpStatus.NOT_FOUND); // sử dụng httpError , HttpStatus.NOT_FOUND : là status trả về ( 404 )
+      }
+      await this.productRepository.update({ id }, newData);
+      return await this.productRepository.findOne({ where: { id } });
+    } catch (error) {
+      throw new HttpException(
+        error.sqlMessage,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
