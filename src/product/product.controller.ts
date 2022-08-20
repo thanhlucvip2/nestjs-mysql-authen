@@ -1,3 +1,4 @@
+import { ValidationPipe } from './../shared/validation.pipe';
 import { ProductService } from './product.service';
 import {
   Body,
@@ -7,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  UsePipes,
 } from '@nestjs/common';
 import { ProductEntity } from './product.entity';
 import { ProductDto } from './dto/product.dto';
@@ -35,6 +37,7 @@ export class ProductController {
   }
 
   @Put(':id')
+  @UsePipes(new ValidationPipe()) // chạy vào đây để check validate data
   async updateData(
     @Param('id') id: string,
     @Body() body: ProductDto,

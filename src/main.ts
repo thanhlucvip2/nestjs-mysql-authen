@@ -8,7 +8,13 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-
+  app.enableCors({
+    origin: [
+      'http://localhost:4200', // angular
+      'http://localhost:3000', // react
+      'http://localhost:8081', // react-native
+    ],
+  });
   const port = configService.get<number>(PORT);
 
   await app.listen(port);
