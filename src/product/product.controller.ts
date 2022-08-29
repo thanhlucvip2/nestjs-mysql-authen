@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ProductEntity } from './product.entity';
 import { ProductDto } from './dto/product.dto';
-
+import * as bcrypt from 'bcryptjs';
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}

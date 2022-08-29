@@ -14,6 +14,7 @@ import {
 import { ProductModule } from './product/product.module';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './shared/logging.interceptor';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { LoggingInterceptor } from './shared/logging.interceptor';
       inject: [ConfigService],
     }),
     ProductModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
