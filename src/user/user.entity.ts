@@ -52,7 +52,7 @@ export class UserEntity {
         id,
         username,
       },
-      process.env.SECRET,
+      process.env.SECRET, // process.env.SECRET : mật mã để giải mã hoặc tạo token
       {
         expiresIn: '7d',
       },

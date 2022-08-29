@@ -8,16 +8,22 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { ProductEntity } from './product.entity';
 import { ProductDto } from './dto/product.dto';
-import * as bcrypt from 'bcryptjs';
-@Controller('product')
+import { AuthGuard } from 'src/shared/auth.guard';
+import { UserCustomDecorator } from 'src/user/user.decorator';
+
+@Controller('api/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
   @Get()
-  async getAllData(): Promise<ProductEntity[]> {
+  @UseGuards(new AuthGuard()) // check user đã đăng nhập chưa
+  async getAllData(@UserCustomDecorator() user): Promise<ProductEntity[]> {
+    console.log(user);
+
     return await this.productService.getAll();
   }
 

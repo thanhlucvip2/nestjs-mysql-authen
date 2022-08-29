@@ -1,13 +1,25 @@
 import { ValidationPipe } from './../shared/validation.pipe';
 import { UserService } from './user.service';
-import { Body, Controller, Get, Post, UsePipes } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import { UserDto } from './user.dto';
+import { AuthGuard } from 'src/shared/auth.guard';
+import { UserCustomDecorator } from './user.decorator';
 
 @Controller('api/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
   @Get()
-  showAllUser() {
+  @UseGuards(new AuthGuard()) // check user đã đăng nhập chưa
+  showAllUser(@UserCustomDecorator() user) {
+    console.log(user);
+
     return this.userService.showAll();
   }
 
