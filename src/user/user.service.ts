@@ -12,7 +12,7 @@ export class UserService {
   ) {}
 
   async showAll() {
-    const user = await this.userRepository.find();
+    const user = await this.userRepository.find({ relations: ['products'] });
     return user.map((user) => user.toResponseObject(true));
   }
 
@@ -26,7 +26,7 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return user.toResponseObject(false);
+    return user.toResponseObject(true);
   }
   async register(data: UserDto) {
     const { username } = data;
@@ -40,6 +40,6 @@ export class UserService {
     }
     user = await this.userRepository.create(data);
     await this.userRepository.save(user);
-    return user.toResponseObject(false);
+    return user.toResponseObject(true);
   }
 }

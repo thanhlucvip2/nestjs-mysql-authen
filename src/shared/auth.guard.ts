@@ -8,6 +8,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     // check xem trong header request có authorization chưa
     if (!request.headers.authorization) {
+      throw new HttpException('no token', HttpStatus.BAD_REQUEST);
       return false;
     }
     // check token
@@ -30,7 +31,7 @@ export class AuthGuard implements CanActivate {
       const decoded = await jsonWebToken.verify(token, process.env.SECRET);
       return decoded;
     } catch (error) {
-      const message = 'Token error: ' + (error.message || error.name);
+      const message = 'Token hết hạn: ' + (error.message || error.name);
       throw new HttpException(message, HttpStatus.FORBIDDEN);
     }
   }

@@ -1,4 +1,5 @@
-import { ProductDto } from './dto/product.dto';
+import { UserDto } from './../user/user.dto';
+import { ProductDto, productUserDto } from './dto/product.dto';
 import { ProductEntity } from './product.entity';
 import {
   Injectable,
@@ -7,25 +8,40 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProductRepository } from './product.repository';
+import { ProductRepository, UserRepository } from './product.repository';
+import { UserEntity } from 'src/user/user.entity';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(ProductEntity)
     private productRepository: ProductRepository,
+    @InjectRepository(UserEntity)
+    private userRepository: UserRepository,
   ) {}
 
-  async getAll(): Promise<ProductEntity[]> {
-    const list = await this.productRepository.find();
+  private toResponsObject(product: ProductEntity): productUserDto {
+    return { ...product, author: product.author.toResponseObject(false) };
+  }
+
+  async getAll(user: UserEntity): Promise<productUserDto[]> {
+    const list = await this.productRepository.find({ relations: ['author'] });
     if (!list.length) {
       throw new NotFoundException({ message: 'khong co du lieu' });
     }
-    return list;
+    const idUser = user.id;
+
+    return list.map((product) => this.toResponsObject(product));
+    // .filter((item) => {
+    //   return item.author.id === idUser;
+    // });
   }
 
-  async findById(id: string): Promise<ProductEntity> {
-    const product = await this.productRepository.findOneBy({ id });
+  async findById(id: string): Promise<productUserDto> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
 
     /*  
     1 . away : this.productRepository.findOneBy({ id });
@@ -35,13 +51,22 @@ export class ProductService {
     if (!product) {
       throw new HttpException('không tìm thấy Id', HttpStatus.NOT_FOUND); // sử dụng httpError , HttpStatus.NOT_FOUND : là status trả về ( 404 )
     }
-    return product;
+    return this.toResponsObject(product);
   }
 
-  async create(dto: ProductDto): Promise<ProductEntity> {
+  async create(dto: ProductDto, user: UserDto): Promise<any> {
     try {
-      const product = await this.productRepository.create(dto);
-      return await this.productRepository.save(product);
+      // const user = await this.userRepository.findOne({ where: { id: userId } });
+
+      const product = await this.productRepository.create({
+        ...dto,
+        author: user,
+      });
+      await this.productRepository.save(product);
+      return {
+        ...product,
+        author: product.author.toResponseObject(true),
+      };
     } catch (error) {
       throw new HttpException(
         error.sqlMessage,
