@@ -10,16 +10,13 @@ import {
 } from '@nestjs/common';
 import { UserDto } from './user.dto';
 import { AuthGuard } from 'src/shared/auth.guard';
-import { UserCustomDecorator } from './user.decorator';
 
 @Controller('api/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
   @Get()
   @UseGuards(new AuthGuard()) // check user đã đăng nhập chưa
-  showAllUser(@UserCustomDecorator() user) {
-    console.log(user);
-
+  showAllUser() {
     return this.userService.showAll();
   }
 

@@ -26,7 +26,7 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return user.toResponseObject(false);
+    return user.toResponseObject(true);
   }
   async register(data: UserDto) {
     const { username } = data;
