@@ -75,8 +75,22 @@ export class ProductService {
     }
   }
 
-  async deleteData(id: string): Promise<{ delete: boolean }> {
-    const product = await this.productRepository.findOneBy({ id });
+  async deleteData(id: string, user: UserEntity): Promise<{ delete: boolean }> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
+
+    // kiểm tra user
+    const userId = user.id;
+
+    // console.log();
+    if (product.author.id !== userId) {
+      throw new HttpException(
+        'user không trùng với sản phẩm',
+        HttpStatus.NOT_FOUND,
+      );
+    }
     // kiểm tra xem id có tồn tại không
     if (!product) {
       throw new HttpException('không tìm thấy Id', HttpStatus.NOT_FOUND); // sử dụng httpError , HttpStatus.NOT_FOUND : là status trả về ( 404 )
@@ -84,7 +98,7 @@ export class ProductService {
     // tiến hành delete
     await this.productRepository.delete({ id });
     return {
-      delete: true,
+      delete: false,
     };
   }
 

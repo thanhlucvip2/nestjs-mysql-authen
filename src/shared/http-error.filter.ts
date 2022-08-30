@@ -1,3 +1,4 @@
+import { HttpStatus } from '@nestjs/common';
 //TODO : tạo bản ghi đè HttpException
 import {
   ArgumentsHost,
@@ -14,7 +15,9 @@ export class HttpErrorFilter implements ExceptionFilter {
     const response = ctx.getResponse();
     const requests = ctx.getRequest();
     // lấy status từ ersponse
-    const status = exception.getStatus(); // response sẽ trả về 404
+    const status = exception.getStatus
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR; // response sẽ trả về 404
 
     // tạo status khi có response lỗi
     const errResponse = {

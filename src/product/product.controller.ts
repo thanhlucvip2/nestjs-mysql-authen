@@ -45,8 +45,11 @@ export class ProductController {
 
   @Delete(':id')
   @UseGuards(new AuthGuard()) // check user đã đăng nhập chưa
-  async deleteData(@Param('id') id: string): Promise<{ delete: boolean }> {
-    return await this.productService.deleteData(id);
+  async deleteData(
+    @UserCustomDecorator() user: UserEntity,
+    @Param('id') id: string,
+  ): Promise<{ delete: boolean }> {
+    return await this.productService.deleteData(id, user);
   }
 
   @Put(':id')
